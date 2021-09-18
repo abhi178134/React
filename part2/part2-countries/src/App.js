@@ -1,25 +1,155 @@
-import logo from './logo.svg';
-import './App.css';
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import Country from './components/showCountry'
+import Spinner from "./components/Spinner";
+const App = () => {
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+  const [countries, setCountries] = useState([]);
+  const [showCountries, setShowCountries] = useState([]);
+  const [country,setCountry] = useState({name: "India",
+  topLevelDomain: [".in"],
+  alpha2Code: "IN",
+  alpha3Code: "IND",
+  callingCodes: ["91"],
+  capital: "New Delhi",
+  altSpellings: ["IN", "Bhārat", "Republic of India", "Bharat Ganrajya"],
+  region: "Asia",
+  subregion: "Southern Asia",
+  population: 1295210000,
+  latlng: [20, 77],
+  demonym: "Indian",
+  area: 3287590,
+  gini: 33.4,
+  timezones: ["UTC+05:30"],
+  borders: ["AFG", "BGD", "BTN", "MMR", "CHN", "NPL", "PAK", "LKA"],
+  nativeName: "भारत",
+  numericCode: "356",
+  currencies: [
+    {
+      code: "INR",
+      name: "Indian rupee",
+      symbol: "₹",
+    },
+  ],
+  languages: [
+    {
+      iso639_1: "hi",
+      iso639_2: "hin",
+      name: "Hindi",
+      nativeName: "हिन्दी",
+    },
+    {
+      iso639_1: "en",
+      iso639_2: "eng",
+      name: "English",
+      nativeName: "English",
+    },
+  ],
+  translations: {
+    de: "Indien",
+    es: "India",
+    fr: "Inde",
+    ja: "インド",
+    it: "India",
+    br: "Índia",
+    pt: "Índia",
+    nl: "India",
+    hr: "Indija",
+    fa: "هند",
+  },
+  flag: "https://restcountries.eu/data/ind.svg",
+  regionalBlocs: [
+    {
+      acronym: "SAARC",
+      name: "South Asian Association for Regional Cooperation",
+      otherAcronyms: [],
+      otherNames: [],
+    },
+  ],
+  cioc: "IND",});
+  const [weather,setWeather] = useState({request: {
+    type: "City",
+    query: "New Delhi, India",
+    language: "en",
+    unit: "m",
+  },
+  location: {
+    name: "New Delhi",
+    country: "India",
+    region: "Delhi",
+    lat: "28.600",
+    lon: "77.200",
+    timezone_id: "Asia/Kolkata",
+    localtime: "2021-05-10 21:21",
+    localtime_epoch: 1620681660,
+    utc_offset: "5.50",
+  },
+  current: {
+    observation_time: "03:51 PM",
+    temperature: 31,
+    weather_code: 143,
+    weather_icons: [
+      "https://assets.weatherstack.com/images/wsymbols01_png_64/wsymbol_0006_mist.png",
+    ],
+    weather_descriptions: ["Haze"],
+    wind_speed: 9,
+    wind_degree: 120,
+    wind_dir: "ESE",
+    pressure: 1004,
+    precip: 0,
+    humidity: 41,
+    cloudcover: 50,
+    feelslike: 29,
+    uv_index: 9,
+    visibility: 4,
+    is_day: "no",
+  },
+});
+
+  useEffect(()=> 
+  {
+    axios.get("https://restcountries.eu/rest/v2/all")
+    .then((response) => {
+      setCountries(response.data);
+    });
+  },[]);
+
+  useEffect(()=> {
+    axios.get(`http://api.weatherstack.com/current?access_key=${process.env.REACT_APP_WEATHER_API_KEY}&query=${country.capital}`)
+    .then((response) => 
+    {
+      setWeather(response.data);
+    });
+  },[country]);
+
+  const handleQuery = (e) => {
+    const q = e.target.value.toLowerCase();
+    if (q === "") setShowCountries([]);
+    else {
+      // console.log(q);
+      const sc = countries.filter((c) => c.name.toLowerCase().startsWith(q));
+      setShowCountries(sc);
+      // console.log(sc);
+      if (showCountries.length === 1) setCountry(showCountries[0]);
+    }
+  };
+ 
+    return (
+      <>
+      <div>
+        Search Country <input onChange={handleQuery} />
+      </div>
+      {
+        showCountries.length >0 && showCountries.map((c) => (
+          <div key={c.name}>
+            {c.name} <button onClick = {() => setCountry(c)}>View</button>
+          </div>
+        ))
+      }
+      <Country country={country} weather={weather} />
+    </>
+    )
 }
 
+;
 export default App;
